@@ -1,39 +1,26 @@
 package de.myfdweb.woc.ultimatediscordbot.modules;
 
-import de.myfdweb.woc.ultimatediscordbot.GuildConfig;
-import de.myfdweb.woc.ultimatediscordbot.Language;
-import de.myfdweb.woc.ultimatediscordbot.Config;
-import de.myfdweb.woc.ultimatediscordbot.module.Module;
-import de.myfdweb.woc.ultimatediscordbot.module.ModuleManifest;
-import de.myfdweb.woc.ultimatediscordbot.UDB;
+import de.myfdweb.woc.ultimatediscordbot.*;
+import net.dv8tion.jda.api.events.Event;
+import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class ModWelcome extends Module {
+public class ModGoodbye extends Module {
 
-    public ModWelcome(UDB botInstance) {
+    public ModGoodbye(UDB botInstance) {
         super(botInstance);
     }
 
     @Override
-    public ModuleManifest getManifest() {
-        return new ModuleManifest(1, Language.de_DE.getString("module.welcome.name"), Language.de_DE.getString("module.welcome.description"), "FDHoho007", "1.0.0");
+    public String getId() {
+        return "dc2a6a29-ce08-44d1-92db-90f165ca7693";
     }
 
     @Override
-    public void onGuildMemberJoin(@NotNull GuildMemberJoinEvent event) {
-        GuildConfig gconfig = getBotInstance().getGuildConfig(event.getGuild());
-        Config config = gconfig.getModConfig(getId());
-        if(gconfig.isModuleActive(getId()) && config.getBoolean("welcome.active"))
-            event.getGuild().getTextChannelById(config.getLong("welcome.channel")).sendMessage(config.getMessage("welcome.message")).queue();
-    }
-
-    @Override
-    public void onGuildMemberRemove(@NotNull GuildMemberRemoveEvent event) {
-        GuildConfig gconfig = getBotInstance().getGuildConfig(event.getGuild());
-        Config config = gconfig.getModConfig(getId());
-        if(gconfig.isModuleActive(getId()) && config.getBoolean("welcome.active"))
-            event.getGuild().getTextChannelById(config.getLong("welcome.channel")).sendMessage(config.getMessage("welcome.message")).queue();
+    @SubscribeEvent({GuildMemberRemoveEvent.class})
+    public void event(GenericGuildEvent event, GuildConfig gConfig, JsonObject config) {
+        event.getGuild().getTextChannelById(config.getLong("channel")).sendMessage(config.getMessage("message", Utils.hashMap("%user%", "<@" + ((GuildMemberRemoveEvent) event).getMember().getId() + ">"))).queue();
     }
 }

@@ -1,9 +1,8 @@
-package de.myfdweb.woc.ultimatediscordbot.module;
+package de.myfdweb.woc.ultimatediscordbot;
 
-import de.myfdweb.woc.ultimatediscordbot.UDB;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
 
-public abstract class Module extends ListenerAdapter {
+public abstract class Module {
 
     private final UDB botInstance;
 
@@ -16,5 +15,7 @@ public abstract class Module extends ListenerAdapter {
     }
 
     public abstract String getId();
+
+    public abstract void event(GenericGuildEvent event, GuildConfig gConfig, JsonObject config);
 
 }

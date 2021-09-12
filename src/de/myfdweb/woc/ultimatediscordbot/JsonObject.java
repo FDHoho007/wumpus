@@ -33,6 +33,10 @@ public class JsonObject {
         return new ArrayList<String>(data.keySet());
     }
 
+    public ArrayList<Object> values() {
+        return new ArrayList<Object>(data.values());
+    }
+
     public String getString(String key) {
         return (String) getRaw(key);
     }

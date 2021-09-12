@@ -1,0 +1,16 @@
+{
+  "module": {
+    "27203ff6-f3b6-4de6-b664-0180643031f0": {
+      "name": "Willkommensnachrichten",
+      "description": "Sendet eine Nachricht, wenn ein neuer Nutzer den Server betritt."
+    },
+    "dc2a6a29-ce08-44d1-92db-90f165ca7693": {
+      "name": "Verlassensnachrichten",
+      "description": "Sendet eine Nachricht, wenn jemand den Server verlässt."
+    },
+    "ef184f35-42bb-4771-9201-bf6cf8f97713": {
+      "name": "Auto Roles",
+      "description": "Weise neuen Nutzern automatisch eine oder mehrere Rollen beim Betreten des Servers zu."
+    }
+  }
+}
