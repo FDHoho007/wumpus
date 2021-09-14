@@ -1,6 +1,6 @@
-package de.myfdweb.woc.ultimatediscordbot.modules;
+package de.myfdweb.woc.wumpus.modules;
 
-import de.myfdweb.woc.ultimatediscordbot.*;
+import de.myfdweb.woc.wumpus.*;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.Role;
@@ -14,7 +14,7 @@ import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionRemove
 
 public class ModReactionRoles extends Module {
 
-    public ModReactionRoles(UDB botInstance) {
+    public ModReactionRoles(Wumpus botInstance) {
         super(botInstance);
     }
 

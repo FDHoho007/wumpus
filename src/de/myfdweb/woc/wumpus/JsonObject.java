@@ -1,4 +1,4 @@
-package de.myfdweb.woc.ultimatediscordbot;
+package de.myfdweb.woc.wumpus;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;

@@ -1,9 +1,9 @@
-package de.myfdweb.woc.ultimatediscordbot;
+package de.myfdweb.woc.wumpus;
 
-import de.myfdweb.woc.ultimatediscordbot.modules.ModAutoRoles;
-import de.myfdweb.woc.ultimatediscordbot.modules.ModGoodbye;
-import de.myfdweb.woc.ultimatediscordbot.modules.ModReactionRoles;
-import de.myfdweb.woc.ultimatediscordbot.modules.ModWelcome;
+import de.myfdweb.woc.wumpus.modules.ModAutoRoles;
+import de.myfdweb.woc.wumpus.modules.ModGoodbye;
+import de.myfdweb.woc.wumpus.modules.ModReactionRoles;
+import de.myfdweb.woc.wumpus.modules.ModWelcome;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
@@ -25,24 +25,24 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class UDB {
+public class Wumpus {
 
-    private static UDB instance;
+    private static Wumpus instance;
     private JDA jda;
     private final HashMap<String, GuildConfig> config = new HashMap<>();
 
     public static void main(String[] args) {
         if (args.length == 1)
-            instance = new UDB(args[0], new Class[]{ModWelcome.class, ModGoodbye.class, ModAutoRoles.class, ModReactionRoles.class});
+            instance = new Wumpus(args[0], new Class[]{ModWelcome.class, ModGoodbye.class, ModAutoRoles.class, ModReactionRoles.class});
         else
-            System.out.println("Syntax: java -jar UDB.jar <Bot Token>");
+            System.out.println("Syntax: java -jar Wumpus.jar <Bot Token>");
     }
 
-    public static UDB getInstance() {
+    public static Wumpus getInstance() {
         return instance;
     }
 
-    public UDB(String token, Class<? extends Module>[] moduleClasses) {
+    public Wumpus(String token, Class<? extends Module>[] moduleClasses) {
         try {
             for (File f : new File("config").listFiles())
                 if (!f.getName().equals("default.json") && f.getName().endsWith(".json"))
@@ -54,13 +54,13 @@ public class UDB {
             ArrayList<Module> modules = new ArrayList<>();
             for (Class<? extends Module> modClass : moduleClasses)
                 try {
-                    modules.add(modClass.getConstructor(UDB.class).newInstance(this));
+                    modules.add(modClass.getConstructor(Wumpus.class).newInstance(this));
                 } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
                     e.printStackTrace();
                 }
             this.jda = JDABuilder.createDefault(token).addEventListeners((EventListener) genericEvent -> {
                 if (genericEvent instanceof GenericGuildEvent) {
-                    GuildConfig gConfig = UDB.this.getGuildConfig(((GenericGuildEvent) genericEvent).getGuild());
+                    GuildConfig gConfig = Wumpus.this.getGuildConfig(((GenericGuildEvent) genericEvent).getGuild());
                     for (Module mod : modules)
                         if (gConfig.isModuleActive(mod.getId()))
                             try {

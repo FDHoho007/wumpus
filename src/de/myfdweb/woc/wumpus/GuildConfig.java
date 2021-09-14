@@ -1,4 +1,4 @@
-package de.myfdweb.woc.ultimatediscordbot;
+package de.myfdweb.woc.wumpus;
 
 import org.json.simple.JSONObject;
 

@@ -1,16 +1,16 @@
-package de.myfdweb.woc.ultimatediscordbot;
+package de.myfdweb.woc.wumpus;
 
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
 
 public abstract class Module {
 
-    private final UDB botInstance;
+    private final Wumpus botInstance;
 
-    public Module(UDB botInstance) {
+    public Module(Wumpus botInstance) {
         this.botInstance = botInstance;
     }
 
-    public UDB getBotInstance() {
+    public Wumpus getBotInstance() {
         return botInstance;
     }
 

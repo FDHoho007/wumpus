@@ -1,15 +1,12 @@
-package de.myfdweb.woc.ultimatediscordbot.modules;
+package de.myfdweb.woc.wumpus.modules;
 
-import de.myfdweb.woc.ultimatediscordbot.*;
-import net.dv8tion.jda.api.events.Event;
+import de.myfdweb.woc.wumpus.*;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
-import org.jetbrains.annotations.NotNull;
 
 public class ModGoodbye extends Module {
 
-    public ModGoodbye(UDB botInstance) {
+    public ModGoodbye(Wumpus botInstance) {
         super(botInstance);
     }
 

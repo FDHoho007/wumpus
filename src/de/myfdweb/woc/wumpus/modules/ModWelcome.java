@@ -1,12 +1,12 @@
-package de.myfdweb.woc.ultimatediscordbot.modules;
+package de.myfdweb.woc.wumpus.modules;
 
-import de.myfdweb.woc.ultimatediscordbot.*;
+import de.myfdweb.woc.wumpus.*;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 
 public class ModWelcome extends Module {
 
-    public ModWelcome(UDB botInstance) {
+    public ModWelcome(Wumpus botInstance) {
         super(botInstance);
     }
 

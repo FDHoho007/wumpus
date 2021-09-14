@@ -1,6 +1,6 @@
-package de.myfdweb.woc.ultimatediscordbot.modules;
+package de.myfdweb.woc.wumpus.modules;
 
-import de.myfdweb.woc.ultimatediscordbot.*;
+import de.myfdweb.woc.wumpus.*;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
@@ -8,7 +8,7 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 
 public class ModAutoRoles extends Module {
 
-    public ModAutoRoles(UDB botInstance) {
+    public ModAutoRoles(Wumpus botInstance) {
         super(botInstance);
     }
 
