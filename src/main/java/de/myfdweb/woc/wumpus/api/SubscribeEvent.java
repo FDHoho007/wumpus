@@ -1,4 +1,4 @@
-package de.myfdweb.woc.wumpus;
+package de.myfdweb.woc.wumpus.api;
 
 import net.dv8tion.jda.api.events.Event;
 

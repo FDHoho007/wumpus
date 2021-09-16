@@ -1,5 +1,6 @@
-package de.myfdweb.woc.wumpus;
+package de.myfdweb.woc.wumpus.api;
 
+import de.myfdweb.woc.wumpus.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -15,6 +16,10 @@ public class JsonObject {
 
     public JsonObject(JSONObject data) {
         this.data = data;
+    }
+
+    public JSONObject getData() {
+        return data;
     }
 
     public Object getRaw(String key) {

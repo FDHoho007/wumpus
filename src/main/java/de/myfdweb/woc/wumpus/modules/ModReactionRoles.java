@@ -1,6 +1,10 @@
 package de.myfdweb.woc.wumpus.modules;
 
 import de.myfdweb.woc.wumpus.*;
+import de.myfdweb.woc.wumpus.api.GuildConfig;
+import de.myfdweb.woc.wumpus.api.JsonObject;
+import de.myfdweb.woc.wumpus.api.Module;
+import de.myfdweb.woc.wumpus.api.SubscribeEvent;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReaction;
 import net.dv8tion.jda.api.entities.Role;

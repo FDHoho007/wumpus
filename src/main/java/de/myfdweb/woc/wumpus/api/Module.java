@@ -1,5 +1,6 @@
-package de.myfdweb.woc.wumpus;
+package de.myfdweb.woc.wumpus.api;
 
+import de.myfdweb.woc.wumpus.Wumpus;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
 
 public abstract class Module {

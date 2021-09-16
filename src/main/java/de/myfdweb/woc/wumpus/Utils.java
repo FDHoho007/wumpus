@@ -7,10 +7,11 @@ import org.json.simple.parser.ParseException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class Utils {
 
-    private static HashMap<String, String> emojis = new HashMap<>();
+    private static final HashMap<String, String> emojis = new HashMap<>();
 
     public static HashMap<String, String> hashMap(String... values) {
         if (values.length % 2 == 0) {
@@ -30,7 +31,7 @@ public class Utils {
 
     static {
         try {
-            JSONObject obj = (JSONObject) new JSONParser().parse(new InputStreamReader(Utils.class.getResourceAsStream("/discord_emojis.json")));
+            JSONObject obj = (JSONObject) new JSONParser().parse(new InputStreamReader(Objects.requireNonNull(Utils.class.getResourceAsStream("/discord_emojis.json"))));
             for (Object name : obj.keySet())
                 emojis.put((String) name, (String) obj.get(name));
         } catch (IOException | ParseException e) {

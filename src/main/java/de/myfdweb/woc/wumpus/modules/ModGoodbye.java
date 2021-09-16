@@ -1,6 +1,10 @@
 package de.myfdweb.woc.wumpus.modules;
 
 import de.myfdweb.woc.wumpus.*;
+import de.myfdweb.woc.wumpus.api.GuildConfig;
+import de.myfdweb.woc.wumpus.api.JsonObject;
+import de.myfdweb.woc.wumpus.api.Module;
+import de.myfdweb.woc.wumpus.api.SubscribeEvent;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 

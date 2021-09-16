@@ -1,5 +1,9 @@
 package de.myfdweb.woc.wumpus;
 
+import de.myfdweb.woc.wumpus.api.GuildConfig;
+import de.myfdweb.woc.wumpus.api.JsonObject;
+import de.myfdweb.woc.wumpus.api.Module;
+import de.myfdweb.woc.wumpus.api.SubscribeEvent;
 import de.myfdweb.woc.wumpus.modules.ModAutoRoles;
 import de.myfdweb.woc.wumpus.modules.ModGoodbye;
 import de.myfdweb.woc.wumpus.modules.ModReactionRoles;
@@ -60,13 +64,14 @@ public class Wumpus {
                 }
             this.jda = JDABuilder.createDefault(token).addEventListeners((EventListener) genericEvent -> {
                 if (genericEvent instanceof GenericGuildEvent) {
-                    GuildConfig gConfig = Wumpus.this.getGuildConfig(((GenericGuildEvent) genericEvent).getGuild());
+                    GenericGuildEvent event = (GenericGuildEvent) genericEvent;
+                    GuildConfig gConfig = Wumpus.this.getGuildConfig(event.getGuild());
                     for (Module mod : modules)
                         if (gConfig.isModuleActive(mod.getId()))
                             try {
                                 Method m = mod.getClass().getMethod("event", GenericGuildEvent.class, GuildConfig.class, JsonObject.class);
                                 if (m.isAnnotationPresent(SubscribeEvent.class) && Arrays.asList(m.getAnnotation(SubscribeEvent.class).value()).contains(genericEvent.getClass()))
-                                    m.invoke(mod, genericEvent, gConfig, gConfig.getModConfig(mod.getId()));
+                                    m.invoke(mod, event, gConfig, gConfig.getModConfig(mod.getId()));
                             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                                 e.printStackTrace();
                             }
@@ -108,9 +113,9 @@ public class Wumpus {
         try {
             File file = new File("config/" + guildId + ".json");
             if (!file.exists())
-                file.createNewFile();
+                assert file.createNewFile();
             FileWriter fw = new FileWriter(file);
-            fw.write(config.data.toJSONString());
+            fw.write(config.getData().toJSONString());
             fw.close();
         } catch (IOException e) {
             e.printStackTrace();

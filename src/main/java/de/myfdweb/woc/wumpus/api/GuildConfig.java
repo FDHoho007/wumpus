@@ -1,5 +1,6 @@
-package de.myfdweb.woc.wumpus;
+package de.myfdweb.woc.wumpus.api;
 
+import de.myfdweb.woc.wumpus.Language;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
