@@ -4,15 +4,15 @@ import de.myfdweb.woc.wumpus.api.GuildConfig;
 import de.myfdweb.woc.wumpus.api.JsonObject;
 import de.myfdweb.woc.wumpus.api.Module;
 import de.myfdweb.woc.wumpus.api.SubscribeEvent;
-import de.myfdweb.woc.wumpus.modules.ModAutoRoles;
-import de.myfdweb.woc.wumpus.modules.ModGoodbye;
-import de.myfdweb.woc.wumpus.modules.ModReactionRoles;
-import de.myfdweb.woc.wumpus.modules.ModWelcome;
+import de.myfdweb.woc.wumpus.modules.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
+import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
@@ -25,9 +25,8 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
+import java.util.function.Consumer;
 
 public class Wumpus {
 
@@ -37,7 +36,7 @@ public class Wumpus {
 
     public static void main(String[] args) {
         if (args.length == 1)
-            instance = new Wumpus(args[0], new Class[]{ModWelcome.class, ModGoodbye.class, ModAutoRoles.class, ModReactionRoles.class});
+            instance = new Wumpus(args[0], new Class[]{ModWelcome.class, ModGoodbye.class, ModAutoRoles.class, ModReactionRoles.class, ModPrivateTalk.class, ModPublicTalk.class});
         else
             System.out.println("Syntax: java -jar Wumpus.jar <Bot Token>");
     }
@@ -56,12 +55,6 @@ public class Wumpus {
                 for (String guildId : config.keySet()) writeGuildConfig(guildId, config.get(guildId));
             }));
             ArrayList<Module> modules = new ArrayList<>();
-            for (Class<? extends Module> modClass : moduleClasses)
-                try {
-                    modules.add(modClass.getConstructor(Wumpus.class).newInstance(this));
-                } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
             this.jda = JDABuilder.createDefault(token).addEventListeners((EventListener) genericEvent -> {
                 if (genericEvent instanceof GenericGuildEvent) {
                     GenericGuildEvent event = (GenericGuildEvent) genericEvent;
@@ -75,9 +68,42 @@ public class Wumpus {
                             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                                 e.printStackTrace();
                             }
+                } else if (genericEvent instanceof SlashCommandEvent) {
+                    SlashCommandEvent event = (SlashCommandEvent) genericEvent;
+                    GuildConfig gConfig = Wumpus.this.getGuildConfig(Objects.requireNonNull(event.getGuild()));
+                    for (Module mod : modules)
+                        if (mod.getCommandData() != null && gConfig.isModuleActive(mod.getId()))
+                            for (CommandData cmd : mod.getCommandData())
+                                if (cmd.getName().equals(event.getName())) {
+                                    mod.onCommand(event);
+                                    break;
+                                }
                 }
-            }).setChunkingFilter(ChunkingFilter.ALL).setMemberCachePolicy(MemberCachePolicy.ALL).enableIntents(GatewayIntent.GUILD_MEMBERS).setRawEventsEnabled(true).build();
-        } catch (LoginException e) {
+            }).setChunkingFilter(ChunkingFilter.ALL).setMemberCachePolicy(MemberCachePolicy.ALL).enableIntents(GatewayIntent.GUILD_MEMBERS).setRawEventsEnabled(true).build().awaitReady();
+            for (Class<? extends Module> modClass : moduleClasses)
+                try {
+                    Module mod = modClass.getConstructor(Wumpus.class).newInstance(this);
+                    if (mod.getCommandData() != null)
+                        for (Guild g : this.jda.getGuilds()) {
+                            GuildConfig gConfig = this.getGuildConfig(g);
+                            JsonObject config = gConfig.getModConfig(mod.getId());
+                            if (gConfig.isModuleActive(mod.getId()) && config.getList("commands") == null)
+                                g.updateCommands().addCommands(mod.getCommandData()).queue(commands -> {
+                                    ArrayList<Long> ids = new ArrayList<>();
+                                    for (Command cmd : commands)
+                                        ids.add(cmd.getIdLong());
+                                    config.set("commands", ids);
+                                });
+                            else if (!gConfig.isModuleActive(mod.getId()) && config.getList("commands") != null) {
+                                config.getList("commands").forEach(o -> g.deleteCommandById((long) o).queue());
+                                config.delete("commands");
+                            }
+                        }
+                    modules.add(mod);
+                } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+        } catch (LoginException | InterruptedException e) {
             e.printStackTrace();
         }
     }

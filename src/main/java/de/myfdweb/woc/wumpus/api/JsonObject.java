@@ -30,6 +30,22 @@ public class JsonObject {
         return o.getOrDefault(keys[keys.length - 1], null);
     }
 
+    public void set(String key, Object value) {
+        String[] keys = key.split("\\.");
+        JSONObject o = data;
+        for (int i = 0; i < keys.length - 1 && o != null; i++)
+            o = (JSONObject) o.getOrDefault(keys[i], null);
+        o.put(keys[keys.length - 1], value);
+    }
+
+    public void delete(String key) {
+        String[] keys = key.split("\\.");
+        JSONObject o = data;
+        for (int i = 0; i < keys.length - 1 && o != null; i++)
+            o = (JSONObject) o.getOrDefault(keys[i], null);
+        o.remove(keys[keys.length - 1]);
+    }
+
     public JsonObject getObject(String key) {
         return new JsonObject((JSONObject) getRaw(key));
     }
@@ -67,8 +83,11 @@ public class JsonObject {
     }
 
     public <T> ArrayList<T> getList(String key) {
+        Object raw = getRaw(key);
+        if(raw == null)
+            return null;
         ArrayList<T> list = new ArrayList<>();
-        for (Object o : (JSONArray) getRaw(key))
+        for (Object o : (JSONArray) raw)
             list.add((T) o);
         return list;
     }
