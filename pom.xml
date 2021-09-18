@@ -25,7 +25,6 @@
                             <mainClass>de.myfdweb.woc.wumpus.Wumpus</mainClass>
                         </manifest>
                     </archive>
-                    <finalName>${pom.artifactId}-${project.version}</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
