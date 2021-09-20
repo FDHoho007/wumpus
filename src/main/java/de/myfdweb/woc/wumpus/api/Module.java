@@ -22,11 +22,13 @@ public abstract class Module {
 
     public abstract void event(GenericGuildEvent event, GuildConfig gConfig, JsonObject config);
 
-    public CommandData[] getCommandData() {
+    public boolean hasCommandData() { return false; }
+
+    public CommandData[] getCommandData(GuildConfig gConfig) {
         return null;
     }
 
-    public void onCommand(SlashCommandEvent event) {
+    public void onCommand(SlashCommandEvent event, GuildConfig gConfig, JsonObject config) {
     }
 
 }

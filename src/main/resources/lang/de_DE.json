@@ -11,6 +11,60 @@
     "ef184f35-42bb-4771-9201-bf6cf8f97713": {
       "name": "Auto Roles",
       "description": "Weise neuen Nutzern automatisch eine oder mehrere Rollen beim Betreten des Servers zu."
+    },
+    "c6c95033-12fd-4d25-9fb6-93ab680b663e": {
+      "name": "Private Talk",
+      "description": "Ermöglicht Nutzern ihre eigenen privaten Sprachkanäle zu erstellen und zu verwalten.",
+      "command": {
+        "error": {
+          "no_permission": "Du bist nicht in der Position solche Forderungen zu stellen :)",
+          "not_in_channel": "Du befindest dich in keinem Channel.",
+          "no_private_talk": "Du befindest dich in keinem Private Talk.",
+          "not_your_private_talk": "An deiner Stelle würde ich das lassen. Das ist nämlich nicht deine Spielwiese.",
+          "no_role_set": "Es wurde keine Rolle für den Zugriff auf Private Talks festgelegt.",
+          "missing_parameter": "Es ist ein interner Fehler aufgetreten. Fehler: MISSING_REQUIRED_ARGUMENT"
+        },
+        "add": {
+          "description": "Füge deinem Private Talk einen weiteren Nutzer hinzu.",
+          "parameter": "den hinzuzufügenden Nutzer",
+          "success": "%s kann nun deinen Private Talk betreten.",
+          "fail": "%s kann deinen Private Talk bereits betreten."
+        },
+        "remove": {
+          "description": "Entferne einen Nutzer aus deinem Private Talk.",
+          "parameter": "den zu entfernenden Nutzer",
+          "success_1": "%s wurde aus deinem Private Talk geworfen und kann diesen nun nicht mehr betreten.",
+          "success_2": "%s kann nun deinen Private Talk nicht mehr betreten.",
+          "fail": "%s kann deinen Private Talk nicht betreten."
+        },
+        "promote": {
+          "description": "Befördere einen Nutzer in deinem Private Talk, sodass auch er Nutzer verwalten kann.",
+          "parameter": "den zu befördernden Nutzer",
+          "success_1": "%s kann nun deinen Private Talk betreten und hat dort erweiterte Rechte.",
+          "success_2": "%s  hat nun in deinem Private Talk erweiterte Rechte.",
+          "fail": "%s hat bereits erweiterte Rechte in deinem Private Talk."
+        },
+        "demote": {
+          "description": "Degradiere einen Nutzer mit erhöhten Rechten.",
+          "parameter": "den zu degradierenden Nutzer",
+          "success": "%s hat nun keine erweiterten Rechte mehr in deinem Private Talk.",
+          "fail": "%s hat keine erweiterten Rechte in deinem Private Talk."
+        },
+        "purge": {
+          "description": "Löst alle Private Talks auf (administrativ).",
+          "success": "Alle Private Talks wurden aufgelöst."
+        },
+        "access": {
+          "description": "Stellt die Anforderung für das Erstellen neuer Private Talks ein.",
+          "parameter": "Anforderung für das Erstellen neuer Private Talks",
+          "open": "Jeder",
+          "restrict": "Nur mit Rolle",
+          "close": "Geschlossen",
+          "success_open": "Jeder kann nun Private Talks erstellen.",
+          "success_restrict": "Nur Nutzer mit der voreingestellen Rolle können nun Private Talks erstellen.",
+          "success_cloe": "Niemand kann mehr Private Talks erstellen."
+        }
+      }
     }
   }
 }

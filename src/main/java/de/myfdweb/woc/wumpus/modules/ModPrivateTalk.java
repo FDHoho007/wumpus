@@ -7,6 +7,7 @@ import de.myfdweb.woc.wumpus.api.Module;
 import de.myfdweb.woc.wumpus.api.SubscribeEvent;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.VoiceChannel;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
 import net.dv8tion.jda.api.events.guild.voice.GenericGuildVoiceUpdateEvent;
@@ -14,6 +15,7 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceJoinEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceLeaveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceMoveEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
@@ -22,12 +24,10 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 public class ModPrivateTalk extends Module {
-
-    private final HashMap<Long, Long> privateTalk = new HashMap<>();
 
     public ModPrivateTalk(Wumpus botInstance) {
         super(botInstance);
@@ -43,80 +43,147 @@ public class ModPrivateTalk extends Module {
     public void event(GenericGuildEvent event, GuildConfig gConfig, JsonObject config) {
         if (event instanceof GenericGuildVoiceUpdateEvent) {
             GenericGuildVoiceUpdateEvent e = (GenericGuildVoiceUpdateEvent) event;
-            if ((event instanceof GuildVoiceJoinEvent || event instanceof GuildVoiceMoveEvent) && config.getList("channels").contains(Objects.requireNonNull(e.getChannelJoined()).getIdLong()))
-                create(Objects.requireNonNull(e.getChannelJoined()), e.getMember(), config.getString("name"));
-            if (event instanceof GuildVoiceLeaveEvent || event instanceof GuildVoiceMoveEvent)
-                delete(Objects.requireNonNull(e.getChannelLeft()));
+            if ((event instanceof GuildVoiceJoinEvent || event instanceof GuildVoiceMoveEvent) && config.getList("channels").contains(Objects.requireNonNull(e.getChannelJoined()).getIdLong())) {
+                VoiceChannel c = e.getChannelJoined();
+                c.getGuild().createVoiceChannel(config.getString("name")).setParent(c.getParent())
+                        .addPermissionOverride(c.getGuild().getPublicRole(), Collections.emptyList(), Collections.singletonList(Permission.VIEW_CHANNEL))
+                        .addPermissionOverride(c.getGuild().getRolesByName("Bot", false).get(0), Arrays.asList(Permission.MANAGE_PERMISSIONS, Permission.VIEW_CHANNEL), Collections.emptyList())
+                        .addPermissionOverride(e.getMember(), Arrays.asList(Permission.VIEW_CHANNEL, Permission.MANAGE_CHANNEL), Collections.emptyList()).queue(voiceChannel -> c.getGuild().moveVoiceMember(e.getMember(), voiceChannel).queue());
+            }
+            if (event instanceof GuildVoiceLeaveEvent || event instanceof GuildVoiceMoveEvent) {
+                if (isPrivateTalk(Objects.requireNonNull(e.getChannelLeft()), config.getList("channels")) && e.getChannelLeft().getMembers().size() == 0)
+                    e.getChannelLeft().delete().queue();
+            }
         }
     }
 
     @Override
-    public CommandData[] getCommandData() {
+    public boolean hasCommandData() {
+        return true;
+    }
+
+    @Override
+    public CommandData[] getCommandData(GuildConfig gConfig) {
         return new CommandData[]{
-                new CommandData("talk", "Private Talks verwalten")
+                new CommandData("talk", "Private Talk verwalten")
                         .addSubcommands(
-                        new SubcommandData("add", "Füge deinem Private Talk einen weiteren Nutzer hinzu.")
-                                .addOption(OptionType.USER, "user", "den hinzuzufügenden Nutzer", true),
-                        new SubcommandData("remove", "Entferne einen Nutzer aus deinem Private Talk.")
-                                .addOption(OptionType.USER, "user", "den zu entfernenden Nutzer", true),
-                        new SubcommandData("promote", "Befördere einen Nutzer in deinem Private Talk, sodass auch er Nutzer verwalten kann.")
-                                .addOption(OptionType.USER, "user", "den zu befördernden Nutzer", true),
-                        new SubcommandData("demote", "Degradiere einen Nutzer mit erhöhten Rechten.")
-                                .addOption(OptionType.USER, "user", "den zu degradierenden Nutzer", true),
-                        new SubcommandData("purge", "Löst alle Private Talks auf (administrativ)."),
-                        new SubcommandData("access", "Stellt die Anforderung für das Erstellen neuer Private Talks ein.")
-                                .addOptions(
-                                        new OptionData(OptionType.STRING, "access_type", "Anforderung für das Erstellen neuer Private Talks", true)
-                                                .addChoices(new Command.Choice("Jeder", "open"), new Command.Choice("Nur mit Rolle", "restrict"), new Command.Choice("Geschlossen", "close")))
+                        new SubcommandData("add", gConfig.getTranslation(this, "command.add.description"))
+                                .addOption(OptionType.USER, "user", gConfig.getTranslation(this, "command.add.parameter"), true),
+                        new SubcommandData("remove", gConfig.getTranslation(this, "command.remove.description"))
+                                .addOption(OptionType.USER, "user", gConfig.getTranslation(this, "command.remove.parameter"), true),
+                        new SubcommandData("promote", gConfig.getTranslation(this, "command.promote.description"))
+                                .addOption(OptionType.USER, "user", gConfig.getTranslation(this, "command.promote.parameter"), true),
+                        new SubcommandData("demote", gConfig.getTranslation(this, "command.demote.description"))
+                                .addOption(OptionType.USER, "user", gConfig.getTranslation(this, "command.demote.parameter"), true),
+                        new SubcommandData("purge", gConfig.getTranslation(this, "command.purge.description")),
+                        new SubcommandData("access", gConfig.getTranslation(this, "command.access.description"))
+                                .addOptions(new OptionData(OptionType.STRING, "access_type", gConfig.getTranslation(this, "command.access.parameter"), true)
+                                        .addChoices(new Command.Choice(gConfig.getTranslation(this, "command.access.open"), "open"), new Command.Choice(gConfig.getTranslation(this, "command.access.restrict"), "restrict"), new Command.Choice(gConfig.getTranslation(this, "command.access.close"), "close")))
                 )
         };
     }
 
     @Override
-    public void onCommand(SlashCommandEvent event) {
-        event.reply("Pong").queue();
-//        DataObject o = event.getPayload().getObject("data").getArray("options").getObject(0);
-//        String action = o.getString("name");
-//        Member invoker = (Member)this.guild.retrieveMemberById(event.getPayload().getObject("member").getObject("user").getString("id")).complete(), target = (Member)this.guild.retrieveMemberById(o.getArray("options").getObject(0).getString("value")).complete();
-//        if (invoker.getVoiceState() != null && invoker.getVoiceState().inVoiceChannel()) {
-//            VoiceChannel channel = invoker.getVoiceState().getChannel();
-//            if (channel != null && invoker.hasPermission((GuildChannel)channel, new Permission[] { Permission.VOICE_MOVE_OTHERS }))
-//                if (action.equalsIgnoreCase("add") && channel.getPermissionOverride((IPermissionHolder)target) == null) {
-//                    channel.getManager().putPermissionOverride((IPermissionHolder)target, Collections.singletonList(Permission.VIEW_CHANNEL), Collections.emptyList()).queue();
-//                } else if (action.equalsIgnoreCase("remove") && channel.getPermissionOverride((IPermissionHolder)target) != null) {
-//                    channel.getManager().removePermissionOverride((IPermissionHolder)target).queue();
-//                    if (target.getVoiceState() != null && target.getVoiceState().getChannel() != null && target.getVoiceState().getChannel().equals(channel))
-//                        this.guild.kickVoiceMember(target).queue();
-//                } else if (action.equalsIgnoreCase("promote") && !target.hasPermission((GuildChannel)channel, new Permission[] { Permission.VOICE_MOVE_OTHERS })) {
-//                    channel.getManager().putPermissionOverride((IPermissionHolder)target, Arrays.asList(new Permission[] { Permission.VIEW_CHANNEL, Permission.VOICE_MUTE_OTHERS, Permission.VOICE_DEAF_OTHERS, Permission.VOICE_MOVE_OTHERS }, ), Collections.emptyList()).queue();
-//                } else if (action.equalsIgnoreCase("demote") && target.hasPermission((GuildChannel)channel, new Permission[] { Permission.VOICE_MOVE_OTHERS })) {
-//                    channel.getManager().putPermissionOverride((IPermissionHolder)target, Collections.singletonList(Permission.VIEW_CHANNEL), Collections.emptyList()).queue();
-//                }
-//        }
+    public void onCommand(SlashCommandEvent event, GuildConfig gConfig, JsonObject config) {
+        event.deferReply(true).queue();
+        InteractionHook hook = event.getHook();
+        Member invoker = event.getMember();
+        if (event.getName().equals("talk") && event.getSubcommandName() != null && invoker != null) {
+            if (event.getSubcommandName().equals("purge"))
+                if (invoker.hasPermission(Permission.MANAGE_CHANNEL)) {
+                    List<Long> channels = config.getList("channels");
+                    for (Long channelId : channels)
+                        for (VoiceChannel ch : Objects.requireNonNull(Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getParent()).getVoiceChannels())
+                            if (!channels.contains(ch.getIdLong()))
+                                ch.getMembers().forEach((member) -> invoker.getGuild().kickVoiceMember(member).queue());
+                    hook.editOriginal(gConfig.getTranslation(this, "command.purge.success")).queue();
+                } else
+                    hook.editOriginal(gConfig.getTranslation(this, "command.error.no_permission")).queue();
+            else if (event.getSubcommandName().equals("access"))
+                if (invoker.hasPermission(Permission.MANAGE_CHANNEL)) {
+                    List<Long> channels = config.getList("channels");
+                    Role role = config.getLong("role") == null ? null : invoker.getGuild().getRoleById(config.getLong("role"));
+                    if (event.getOption("access_type").getAsString().equals("open")) {
+                        for (Long channelId : channels) {
+                            Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(invoker.getGuild().getPublicRole(), Collections.singletonList(Permission.VOICE_CONNECT), Collections.emptyList()).queue();
+                            if (role != null)
+                                Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().removePermissionOverride(role).queue();
+                            hook.editOriginal(gConfig.getTranslation(this, "command.access.success_open")).queue();
+                        }
+                    } else if (event.getOption("access_type").getAsString().equals("restrict")) {
+                        if (role != null)
+                            for (Long channelId : channels) {
+                                Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(invoker.getGuild().getPublicRole(), Collections.emptyList(), Collections.singletonList(Permission.VOICE_CONNECT)).queue();
+                                Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(role, Collections.singletonList(Permission.VOICE_CONNECT), Collections.emptyList()).queue();
+                                hook.editOriginal(gConfig.getTranslation(this, "command.access.success_restrict")).queue();
+                            }
+                        else
+                            hook.editOriginal(gConfig.getTranslation(this, "command.error.no_role_set")).queue();
+                    } else if (event.getOption("access_type").getAsString().equals("close")) {
+                        for (Long channelId : channels) {
+                            Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(invoker.getGuild().getPublicRole(), Collections.emptyList(), Collections.singletonList(Permission.VOICE_CONNECT)).queue();
+                            if (role != null)
+                                Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().removePermissionOverride(role).queue();
+                            hook.editOriginal(gConfig.getTranslation(this, "command.access.success_close")).queue();
+                        }
+                    }
+                } else
+                    hook.editOriginal(gConfig.getTranslation(this, "command.error.no_permission")).queue();
+            else if (invoker.getVoiceState() != null && Objects.requireNonNull(invoker.getVoiceState()).inVoiceChannel()) {
+                VoiceChannel channel = invoker.getVoiceState().getChannel();
+                Member target = Objects.requireNonNull(event.getOption("user")).getAsMember();
+                if (channel != null && target != null)
+                    if (isPrivateTalk(channel, config.getList("channels")))
+                        if (invoker.hasPermission(channel, Permission.MANAGE_CHANNEL))
+                            switch (event.getSubcommandName()) {
+                                case "add":
+                                    if (!target.hasPermission(channel, Permission.VIEW_CHANNEL)) {
+                                        channel.getManager().putPermissionOverride(target, Collections.singletonList(Permission.VIEW_CHANNEL), Collections.emptyList()).queue();
+                                        hook.editOriginal(String.format(gConfig.getTranslation(this, "command.add.success"), target.getEffectiveName())).queue();
+                                    } else
+                                        hook.editOriginal(String.format(gConfig.getTranslation(this, "command.add.fail"), target.getEffectiveName())).queue();
+                                    break;
+                                case "remove":
+                                    if (target.hasPermission(channel, Permission.VIEW_CHANNEL)) {
+                                        channel.getManager().removePermissionOverride(target).queue();
+                                        boolean kick = target.getVoiceState() != null && target.getVoiceState().getChannel() != null && target.getVoiceState().getChannel().equals(channel);
+                                        if (kick)
+                                            channel.getGuild().kickVoiceMember(target).queue();
+                                        hook.editOriginal(String.format(gConfig.getTranslation(this, kick ? "command.remove.success_1" : "command.remove.success_2"), target.getEffectiveName())).queue();
+                                    } else
+                                        hook.editOriginal(String.format(gConfig.getTranslation(this, "command.remove.fail"), target.getEffectiveName())).queue();
+                                    break;
+                                case "promote":
+                                    if (!target.hasPermission(channel, Permission.MANAGE_CHANNEL)) {
+                                        boolean newUser = !target.hasPermission(channel, Permission.VIEW_CHANNEL);
+                                        channel.getManager().putPermissionOverride(target, Arrays.asList(Permission.VIEW_CHANNEL, Permission.MANAGE_CHANNEL), Collections.emptyList()).queue();
+                                        hook.editOriginal(String.format(gConfig.getTranslation(this, newUser ? "command.promote.success_1" : "command.promote.success_2"), target.getEffectiveName())).queue();
+                                    } else
+                                        hook.editOriginal(String.format(gConfig.getTranslation(this, "command.promote.fail"), target.getEffectiveName())).queue();
+                                    break;
+                                case "demote":
+                                    if (target.hasPermission(channel, Permission.MANAGE_CHANNEL)) {
+                                        channel.getManager().putPermissionOverride(target, Collections.singletonList(Permission.VIEW_CHANNEL), Collections.emptyList()).queue();
+                                        hook.editOriginal(String.format(gConfig.getTranslation(this, "command.demote.success"), target.getEffectiveName())).queue();
+                                    } else
+                                        hook.editOriginal(String.format(gConfig.getTranslation(this, "command.demote.fail"), target.getEffectiveName())).queue();
+                                    break;
+                            }
+                        else
+                            hook.editOriginal(gConfig.getTranslation(this, "command.error.not_your_private_talk")).queue();
+                    else
+                        hook.editOriginal(gConfig.getTranslation(this, "command.error.no_private_talk")).queue();
+            } else
+                hook.editOriginal(gConfig.getTranslation(this, "command.error.not_in_channel")).queue();
+        }
     }
 
-    private void create(VoiceChannel c, Member m, String name) {
-        c.getGuild().createVoiceChannel(name).setParent(c.getParent())
-                .addPermissionOverride(c.getGuild().getPublicRole(), Collections.emptyList(), Collections.singletonList(Permission.VIEW_CHANNEL))
-                .addPermissionOverride(c.getGuild().getRolesByName("Bot", false).get(0), Arrays.asList(Permission.MANAGE_PERMISSIONS, Permission.VIEW_CHANNEL), Collections.emptyList())
-                .addPermissionOverride(m, Arrays.asList(Permission.VIEW_CHANNEL, Permission.MANAGE_CHANNEL, Permission.VOICE_MUTE_OTHERS, Permission.VOICE_DEAF_OTHERS, Permission.VOICE_MOVE_OTHERS), Collections.emptyList()).queue(voiceChannel -> {
-                    this.privateTalk.put(voiceChannel.getIdLong(), c.getGuild().getIdLong());
-                    c.getGuild().moveVoiceMember(m, voiceChannel).queue();
-                });
-    }
-
-    private void delete(VoiceChannel c) {
-        if (this.privateTalk.containsKey(c.getIdLong()) && c.getMembers().size() == 0)
-            c.delete().queue(unused -> this.privateTalk.remove(c.getIdLong()));
-    }
-
-    public void purge(Long guildId) {
-        for (Long channelId : this.privateTalk.keySet())
-            if (this.privateTalk.get(channelId).equals(guildId)) {
-                VoiceChannel channel = getBotInstance().getJDA().getVoiceChannelById(channelId);
-                if (channel != null)
-                    channel.getMembers().forEach((member) -> channel.getGuild().kickVoiceMember(member).queue());
-            }
+    public boolean isPrivateTalk(VoiceChannel channel, List<Long> channels) {
+        if (!channels.contains(channel.getIdLong()) && channel.getParent() != null)
+            for (Long channelId : channels)
+                if (channel.getParent().equals(Objects.requireNonNull(channel.getGuild().getVoiceChannelById(channelId)).getParent()))
+                    return true;
+        return false;
     }
 
 }

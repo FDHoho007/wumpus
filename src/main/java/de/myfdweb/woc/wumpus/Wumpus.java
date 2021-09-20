@@ -72,10 +72,10 @@ public class Wumpus {
                     SlashCommandEvent event = (SlashCommandEvent) genericEvent;
                     GuildConfig gConfig = Wumpus.this.getGuildConfig(Objects.requireNonNull(event.getGuild()));
                     for (Module mod : modules)
-                        if (mod.getCommandData() != null && gConfig.isModuleActive(mod.getId()))
-                            for (CommandData cmd : mod.getCommandData())
+                        if (mod.hasCommandData() && gConfig.isModuleActive(mod.getId()))
+                            for (CommandData cmd : mod.getCommandData(gConfig))
                                 if (cmd.getName().equals(event.getName())) {
-                                    mod.onCommand(event);
+                                    mod.onCommand(event, gConfig, gConfig.getModConfig(mod.getId()));
                                     break;
                                 }
                 }
@@ -83,12 +83,12 @@ public class Wumpus {
             for (Class<? extends Module> modClass : moduleClasses)
                 try {
                     Module mod = modClass.getConstructor(Wumpus.class).newInstance(this);
-                    if (mod.getCommandData() != null)
+                    if (mod.hasCommandData())
                         for (Guild g : this.jda.getGuilds()) {
                             GuildConfig gConfig = this.getGuildConfig(g);
                             JsonObject config = gConfig.getModConfig(mod.getId());
                             if (gConfig.isModuleActive(mod.getId()) && config.getList("commands") == null)
-                                g.updateCommands().addCommands(mod.getCommandData()).queue(commands -> {
+                                g.updateCommands().addCommands(mod.getCommandData(gConfig)).queue(commands -> {
                                     ArrayList<Long> ids = new ArrayList<>();
                                     for (Command cmd : commands)
                                         ids.add(cmd.getIdLong());

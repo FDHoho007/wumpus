@@ -22,6 +22,10 @@ public class GuildConfig extends JsonObject {
         return language;
     }
 
+    public String getTranslation(Module module, String key) {
+        return getLanguage().getTranslation(module, key);
+    }
+
     public ArrayList<String> getModulesActive() {
         return modulesActive;
     }
