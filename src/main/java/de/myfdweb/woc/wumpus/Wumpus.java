@@ -9,11 +9,13 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.json.simple.JSONObject;
@@ -24,11 +26,15 @@ import javax.security.auth.login.LoginException;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.function.Consumer;
 
 public class Wumpus {
+
+    // Module Ideas: Custom Echo Commands, Logging, Automatic Moderation (Clear Invites, External Links), Timed Messages, Giveaway, Levelsystem, Notifications (YouTube, Twitch, Instagram), Leaderboard (Join Button + Vanity Url), Spiele, Musik, Recording, Support, Events, Move Server, Temp Bans, Warnings, Subscriptions
 
     private static Wumpus instance;
     private JDA jda;
@@ -36,7 +42,7 @@ public class Wumpus {
 
     public static void main(String[] args) {
         if (args.length == 1)
-            instance = new Wumpus(args[0], new Class[]{ModWelcome.class, ModGoodbye.class, ModAutoRoles.class, ModReactionRoles.class, ModPrivateTalk.class, ModPublicTalk.class});
+            instance = new Wumpus(args[0], new Class[]{ModWelcome.class, ModGoodbye.class, ModAutoRoles.class, ModReactionRoles.class, ModPrivateTalk.class, ModPublicTalk.class, ModEmbedEditor.class, ModAboutMe.class, ModDecorationRoles.class});
         else
             System.out.println("Syntax: java -jar Wumpus.jar <Bot Token>");
     }
@@ -78,31 +84,35 @@ public class Wumpus {
                                     mod.onCommand(event, gConfig, gConfig.getModConfig(mod.getId()));
                                     break;
                                 }
+                } else if (genericEvent instanceof ButtonClickEvent) {
+                    ButtonClickEvent event = (ButtonClickEvent) genericEvent;
+                    GuildConfig gConfig = Wumpus.this.getGuildConfig(Objects.requireNonNull(event.getGuild()));
+                    for (Module mod : modules)
+                        if (gConfig.isModuleActive(mod.getId()))
+                            mod.onClick(event, gConfig, gConfig.getModConfig(mod.getId()));
                 }
             }).setChunkingFilter(ChunkingFilter.ALL).setMemberCachePolicy(MemberCachePolicy.ALL).enableIntents(GatewayIntent.GUILD_MEMBERS).setRawEventsEnabled(true).build().awaitReady();
             for (Class<? extends Module> modClass : moduleClasses)
                 try {
-                    Module mod = modClass.getConstructor(Wumpus.class).newInstance(this);
-                    if (mod.hasCommandData())
-                        for (Guild g : this.jda.getGuilds()) {
-                            GuildConfig gConfig = this.getGuildConfig(g);
-                            JsonObject config = gConfig.getModConfig(mod.getId());
-                            if (gConfig.isModuleActive(mod.getId()) && config.getList("commands") == null)
-                                g.updateCommands().addCommands(mod.getCommandData(gConfig)).queue(commands -> {
-                                    ArrayList<Long> ids = new ArrayList<>();
-                                    for (Command cmd : commands)
-                                        ids.add(cmd.getIdLong());
-                                    config.set("commands", ids);
-                                });
-                            else if (!gConfig.isModuleActive(mod.getId()) && config.getList("commands") != null) {
-                                config.getList("commands").forEach(o -> g.deleteCommandById((long) o).queue());
-                                config.delete("commands");
-                            }
-                        }
-                    modules.add(mod);
+                    modules.add(modClass.getConstructor(Wumpus.class).newInstance(this));
                 } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
                     e.printStackTrace();
                 }
+            for (Guild g : this.jda.getGuilds()) {
+                GuildConfig gConfig = this.getGuildConfig(g);
+                ArrayList<String> mods = new ArrayList<>();
+                for (Module mod : modules)
+                    if (mod.getCommandData(gConfig) != null && gConfig.isModuleActive(mod.getId()))
+                        mods.add(mod.getId());
+                if (!Utils.sha256(String.join(";", mods)).equals(gConfig.getString("commandHash"))) {
+                    CommandListUpdateAction action = g.updateCommands();
+                    for (Module mod : modules)
+                        if (mod.getCommandData(gConfig) != null && gConfig.isModuleActive(mod.getId()))
+                            action = action.addCommands(mod.getCommandData(gConfig));
+                    action.queue();
+                    gConfig.set("commandHash", Utils.sha256(String.join(";", mods)));
+                }
+            }
         } catch (LoginException | InterruptedException e) {
             e.printStackTrace();
         }

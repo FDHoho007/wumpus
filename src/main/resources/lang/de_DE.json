@@ -12,6 +12,19 @@
       "name": "Auto Roles",
       "description": "Weise neuen Nutzern automatisch eine oder mehrere Rollen beim Betreten des Servers zu."
     },
+    "2320e5d6-8939-4658-b7f6-7972874d8eb5": {
+      "name": "About Me",
+      "description": "",
+      "initiationMessage": "Lass mich dir ein paar Fragen stellen, um dich besser kennenzulernen. Alle Angaben sind freiwillig und werden als Rolle bei dir festgehalten. Du kannst diese jederzeit ändern und wieder entfernen.",
+      "initiationButton": "Los geht's",
+      "setupMessage": "Was ist %s?",
+      "setupFinished": "Das waren alle Fragen. Un denk dran, wenn du etwas ändern möchtest, kannst du jederzeit zurückkommen.",
+      "command": {
+        "description": "Erstellt eine About Me Nachricht.",
+        "error": "Du bist nicht in der Position solche Forderungen zu stellen :)",
+        "success": "Der About Me Channel wurde neu geladen."
+      }
+    },
     "c6c95033-12fd-4d25-9fb6-93ab680b663e": {
       "name": "Private Talk",
       "description": "Ermöglicht Nutzern ihre eigenen privaten Sprachkanäle zu erstellen und zu verwalten.",

@@ -5,7 +5,10 @@
     "ef184f35-42bb-4771-9201-bf6cf8f97713",
     "b8ba9570-7c23-41e3-985b-20f9a3c84427",
     "c6c95033-12fd-4d25-9fb6-93ab680b663e",
-    "09afafbf-8b42-497c-b5fb-ad22f4ca61b9"
+    "09afafbf-8b42-497c-b5fb-ad22f4ca61b9",
+    "984b7f8e-5ed5-416f-aee0-6cbb81dd0248",
+    "2320e5d6-8939-4658-b7f6-7972874d8eb5",
+    "bf1ce435-4b7d-4ef5-a811-22273299cabc"
   ],
   "moduleConfig": {
     "ef184f35-42bb-4771-9201-bf6cf8f97713": {
@@ -21,6 +24,39 @@
       "channel": 856912739674226709,
       "message": 856912777293594644
     },
+    "2320e5d6-8939-4658-b7f6-7972874d8eb5": {
+      "properties": [
+        {
+          "roles": [
+            856930497946189874,
+            891384780782968852
+          ],
+          "name": "Geschlecht"
+        },
+        {
+          "roles": [
+            891384832058331176,
+            891384832368738315
+          ],
+          "name": "Alter"
+        },
+        {
+          "roles": [
+            891384815142711346,
+            891384818150027367,
+            891384819764846664
+          ],
+          "name": "Sexualität"
+        },
+        {
+          "roles": [
+            891384840459534406,
+            891384841491320863
+          ],
+          "name": "Beziehungsstatus"
+        }
+      ]
+    },
     "09afafbf-8b42-497c-b5fb-ad22f4ca61b9": {
       "categories": [
         888563077321195581
@@ -30,10 +66,7 @@
       "channels": [
         889267352477241357
       ],
-      "name": "Private Talk",
-      "commands": [
-        888909171259473921
-      ]
+      "name": "Private Talk"
     },
     "27203ff6-f3b6-4de6-b664-0180643031f0": {
       "channel": 844279250831802402,
@@ -44,5 +77,7 @@
       "message": "Tschüss, %user%!"
     }
   },
+  "botAdmin": 891390274826293338,
+  "commandHash": "9017add65647ee9bbcaa003f4cc13df00a4f6b210f1c47f03a1e8ae9456334b8",
   "language": "de_DE"
 }

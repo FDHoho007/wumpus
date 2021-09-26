@@ -3,6 +3,7 @@ package de.myfdweb.woc.wumpus.api;
 import de.myfdweb.woc.wumpus.Wumpus;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.guild.GenericGuildEvent;
+import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
 import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 
@@ -20,7 +21,7 @@ public abstract class Module {
 
     public abstract String getId();
 
-    public abstract void event(GenericGuildEvent event, GuildConfig gConfig, JsonObject config);
+    public void event(GenericGuildEvent event, GuildConfig gConfig, JsonObject config) {}
 
     public boolean hasCommandData() { return false; }
 
@@ -28,7 +29,8 @@ public abstract class Module {
         return null;
     }
 
-    public void onCommand(SlashCommandEvent event, GuildConfig gConfig, JsonObject config) {
-    }
+    public void onCommand(SlashCommandEvent event, GuildConfig gConfig, JsonObject config) {}
+
+    public void onClick(ButtonClickEvent event, GuildConfig gConfig, JsonObject config) {}
 
 }

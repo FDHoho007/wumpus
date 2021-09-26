@@ -38,4 +38,8 @@ public class GuildConfig extends JsonObject {
         JSONObject json = (JSONObject) getRaw("moduleConfig." + moduleId);
         return json == null ? null : new JsonObject(json);
     }
+
+    public long getBotAdmin() {
+        return getLong("botAdmin");
+    }
 }
