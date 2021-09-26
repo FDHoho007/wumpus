@@ -47,7 +47,7 @@ public class ModPrivateTalk extends Module {
                 VoiceChannel c = e.getChannelJoined();
                 c.getGuild().createVoiceChannel(config.getString("name")).setParent(c.getParent())
                         .addPermissionOverride(c.getGuild().getPublicRole(), Collections.emptyList(), Collections.singletonList(Permission.VIEW_CHANNEL))
-                        .addPermissionOverride(c.getGuild().getRolesByName("Bot", false).get(0), Arrays.asList(Permission.MANAGE_PERMISSIONS, Permission.VIEW_CHANNEL), Collections.emptyList())
+                        .addPermissionOverride(c.getGuild().getRolesByName("Bot", false).get(0), Collections.singletonList(Permission.VIEW_CHANNEL), Collections.emptyList())
                         .addPermissionOverride(e.getMember(), Arrays.asList(Permission.VIEW_CHANNEL, Permission.MANAGE_CHANNEL), Collections.emptyList()).queue(voiceChannel -> c.getGuild().moveVoiceMember(e.getMember(), voiceChannel).queue());
             }
             if (event instanceof GuildVoiceLeaveEvent || event instanceof GuildVoiceMoveEvent) {
@@ -105,7 +105,7 @@ public class ModPrivateTalk extends Module {
                     Role role = config.getLong("role") == null ? null : invoker.getGuild().getRoleById(config.getLong("role"));
                     if (event.getOption("access_type").getAsString().equals("open")) {
                         for (Long channelId : channels) {
-                            Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(invoker.getGuild().getPublicRole(), Collections.singletonList(Permission.VOICE_CONNECT), Collections.emptyList()).queue();
+                            Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(invoker.getGuild().getPublicRole(), Collections.singletonList(Permission.VIEW_CHANNEL), Collections.emptyList()).queue();
                             if (role != null)
                                 Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().removePermissionOverride(role).queue();
                             hook.editOriginal(gConfig.getTranslation(this, "command.access.success_open")).queue();
@@ -113,15 +113,15 @@ public class ModPrivateTalk extends Module {
                     } else if (event.getOption("access_type").getAsString().equals("restrict")) {
                         if (role != null)
                             for (Long channelId : channels) {
-                                Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(invoker.getGuild().getPublicRole(), Collections.emptyList(), Collections.singletonList(Permission.VOICE_CONNECT)).queue();
-                                Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(role, Collections.singletonList(Permission.VOICE_CONNECT), Collections.emptyList()).queue();
+                                Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(invoker.getGuild().getPublicRole(), Collections.emptyList(), Collections.singletonList(Permission.VIEW_CHANNEL)).queue();
+                                Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(role, Collections.singletonList(Permission.VIEW_CHANNEL), Collections.emptyList()).queue();
                                 hook.editOriginal(gConfig.getTranslation(this, "command.access.success_restrict")).queue();
                             }
                         else
                             hook.editOriginal(gConfig.getTranslation(this, "command.error.no_role_set")).queue();
                     } else if (event.getOption("access_type").getAsString().equals("close")) {
                         for (Long channelId : channels) {
-                            Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(invoker.getGuild().getPublicRole(), Collections.emptyList(), Collections.singletonList(Permission.VOICE_CONNECT)).queue();
+                            Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().putPermissionOverride(invoker.getGuild().getPublicRole(), Collections.emptyList(), Collections.singletonList(Permission.VIEW_CHANNEL)).queue();
                             if (role != null)
                                 Objects.requireNonNull(invoker.getGuild().getVoiceChannelById(channelId)).getManager().removePermissionOverride(role).queue();
                             hook.editOriginal(gConfig.getTranslation(this, "command.access.success_close")).queue();

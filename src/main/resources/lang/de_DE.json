@@ -75,7 +75,7 @@
           "close": "Geschlossen",
           "success_open": "Jeder kann nun Private Talks erstellen.",
           "success_restrict": "Nur Nutzer mit der voreingestellen Rolle können nun Private Talks erstellen.",
-          "success_cloe": "Niemand kann mehr Private Talks erstellen."
+          "success_close": "Niemand kann mehr Private Talks erstellen."
         }
       }
     }
