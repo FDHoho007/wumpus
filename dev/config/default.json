@@ -1,5 +1,7 @@
 {
   "language": "de_DE",
   "modulesActive": [],
-  "moduleConfig": {}
+  "moduleConfig": {},
+  "botAdmin": 0,
+  "commandHash": ""
 }
