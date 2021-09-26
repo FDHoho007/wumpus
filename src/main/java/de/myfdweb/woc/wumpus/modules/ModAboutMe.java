@@ -99,6 +99,8 @@ public class ModAboutMe extends Module {
         }
         if (hasValue)
             buttons.add(Button.danger("aboutMe/" + index + "/-1", "Entfernen"));
+        else
+            buttons.add(Button.secondary("aboutMe/" + index + "/-1", "keine Angabe"));
         return buttons.toArray(new Component[0]);
     }
 
