@@ -18,7 +18,7 @@
       "initiationMessage": "Lass mich dir ein paar Fragen stellen, um dich besser kennenzulernen. Alle Angaben sind freiwillig und werden als Rolle bei dir festgehalten. Du kannst diese jederzeit ändern und wieder entfernen.",
       "initiationButton": "Los geht's",
       "setupMessage": "Was ist %s?",
-      "setupFinished": "Das waren alle Fragen. Un denk dran, wenn du etwas ändern möchtest, kannst du jederzeit zurückkommen.",
+      "setupFinished": "Das waren alle Fragen. Und denk dran, wenn du etwas ändern möchtest, kannst du jederzeit zurückkommen.",
       "command": {
         "description": "Erstellt eine About Me Nachricht.",
         "error": "Du bist nicht in der Position solche Forderungen zu stellen :)",
